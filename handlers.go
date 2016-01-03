@@ -26,6 +26,7 @@ func BuildIndex(w http.ResponseWriter, r *http.Request) {
 		result[i].Id = keys[i].IntID()
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
 }
@@ -54,6 +55,7 @@ func BuildShow(w http.ResponseWriter, r *http.Request) {
 
 	result.Id = k.IntID()
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(result); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -77,6 +79,7 @@ func BuildInsert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(build); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -110,6 +113,7 @@ func BuildUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(build); err != nil {
 		panic(err)
