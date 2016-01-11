@@ -16,9 +16,31 @@ type Address struct {
 	Location     appengine.GeoPoint `json:"location"`
 }
 
+type Person struct {
+	Lastname  string  `json:"lastname"`
+	Firstname string  `json:"firstname"`
+	Address   Address `json:"address"`
+	Home      string  `json:"home"`
+	Work      string  `json:"work"`
+	Mobile    string  `json:"mobile"`
+	Fax       string  `json:"fax"`
+	Other     string  `json:"other"`
+	Email     string  `json:"email"`
+	Ibank     string  `json:"ibank"`
+}
+
 type Appartment struct {
-	Title    string `json:"title" bson:"Title"`
-	Position int    `json:"position" bson:"Position"`
+	Title    string `json:"title"`
+	Position int32  `json:"position"`
+	Resident Person `json:"resident"`
+	Owner    Person `json:"owner"`
+	Common   int64  `json:"common"`
+	Elevetor int64  `json:"elevetor"`
+	Heat     int64  `json:"heat"`
+	Ei       int64  `json:"ei"`
+	Fi       int64  `json:"fi"`
+	Owners   int64  `json:"owners"`
+	Other    int64  `json:"other"`
 }
 
 type Building struct {
@@ -26,6 +48,7 @@ type Building struct {
 	Address     Address      `json:"address"`
 	Oil         int64        `json:"oil"`
 	Fund        int64        `json:"fund"`
+	Closed      int64        `json:"closed"`
 	Active      bool         `json:"active"`
 	Managment   bool         `json:"managment"`
 	Appartments []Appartment `json:"appartments"`
@@ -34,9 +57,6 @@ type Building struct {
 type PublicBuild Building
 
 func (b Building) MarshalJSON() ([]byte, error) {
-	if b.Appartments == nil {
-		b.Appartments = []Appartment{}
-	}
 	return json.Marshal(struct {
 		PublicBuild
 		Title string `json:"title"`

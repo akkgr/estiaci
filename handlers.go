@@ -70,6 +70,10 @@ func BuildInsert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if build.Appartments == nil {
+		build.Appartments = []Appartment{{Title: "A", Position: 1}}
+	}
+
 	c := appengine.NewContext(r)
 
 	err := build.save(c)
@@ -105,6 +109,10 @@ func BuildUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := appengine.NewContext(r)
+
+	if build.Appartments == nil {
+		build.Appartments = []Appartment{{Title: "A", Position: 1}}
+	}
 
 	err = build.save(c)
 
