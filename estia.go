@@ -15,10 +15,6 @@ func init() {
     r.HandleFunc("/api/buildings/{id}", BuildUpdate).Methods("PUT")
 	r.HandleFunc("/api/buildings/{id}", BuildDelete).Methods("DELETE")
 
-    // methods := handlers.AllowedMethods([]string{"OPTIONS", "DELETE", "GET", "HEAD", "POST", "PUT"})
-    // headers := handlers.AllowedHeaders([]string{"*"})
-    // origins := handlers.AllowedOrigins([]string{"http://localhost/"})
-    // options := handlers.IgnoreOptions()
     handler := cors.Default().Handler(r)
 
     http.Handle("/", handler)
