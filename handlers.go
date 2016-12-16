@@ -45,7 +45,6 @@ func BuildSingle(w http.ResponseWriter, r *http.Request) {
 
 	var result Building
 	result.Id = i
-	result.Address.Street = "Test"
 
 	if i != 0 {
 		c := appengine.NewContext(r)

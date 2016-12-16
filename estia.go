@@ -2,8 +2,7 @@ package estia
 
 import (
 	"net/http"
-
-	"github.com/rs/cors"
+    
     "github.com/gorilla/mux"
 )
 
@@ -15,7 +14,20 @@ func init() {
     r.HandleFunc("/api/buildings/{id}", BuildUpdate).Methods("PUT")
 	r.HandleFunc("/api/buildings/{id}", BuildDelete).Methods("DELETE")
 
-    handler := cors.Default().Handler(r)
+    handler := corsHandler(r)
 
     http.Handle("/", handler)
+}
+
+func corsHandler(h http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			w.WriteHeader(http.StatusOK)
+	} else {
+			h.ServeHTTP(w, r)
+		}
+	}
 }
