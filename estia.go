@@ -2,22 +2,24 @@ package estia
 
 import (
 	"net/http"
+
+	"github.com/rs/cors"
+    "github.com/gorilla/mux"
 )
 
 func init() {
-	router := NewRouter()
-	http.Handle("/", corsHandler(router))
-}
+	r := mux.NewRouter()
+    r.HandleFunc("/api/buildings", BuildAll).Methods("GET")
+    r.HandleFunc("/api/buildings/{id}", BuildSingle).Methods("GET")
+	r.HandleFunc("/api/buildings", BuildInsert).Methods("POST")
+    r.HandleFunc("/api/buildings/{id}", BuildUpdate).Methods("PUT")
+	r.HandleFunc("/api/buildings/{id}", BuildDelete).Methods("DELETE")
 
-func corsHandler(h http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		if r.Method == "OPTIONS" {
-			w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-			w.WriteHeader(http.StatusOK)
-		} else {
-			h.ServeHTTP(w, r)
-		}
-	}
+    // methods := handlers.AllowedMethods([]string{"OPTIONS", "DELETE", "GET", "HEAD", "POST", "PUT"})
+    // headers := handlers.AllowedHeaders([]string{"*"})
+    // origins := handlers.AllowedOrigins([]string{"http://localhost/"})
+    // options := handlers.IgnoreOptions()
+    handler := cors.Default().Handler(r)
+
+    http.Handle("/", handler)
 }

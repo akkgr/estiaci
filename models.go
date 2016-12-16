@@ -1,8 +1,6 @@
 package estia
 
 import (
-	"encoding/json"
-
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -17,8 +15,10 @@ type Address struct {
 }
 
 type Person struct {
+	Id        int64   `json:"id" datastore:"-"`
 	Lastname  string  `json:"lastname"`
 	Firstname string  `json:"firstname"`
+	Fullname  string  `json:"fullname" datastore:"-"`
 	Address   Address `json:"address"`
 	Home      string  `json:"home"`
 	Work      string  `json:"work"`
@@ -30,17 +30,19 @@ type Person struct {
 }
 
 type Appartment struct {
-	Title    string `json:"title"`
-	Position int32  `json:"position"`
-	Resident Person `json:"resident"`
-	Owner    Person `json:"owner"`
-	Common   int64  `json:"common"`
-	Elevetor int64  `json:"elevetor"`
-	Heat     int64  `json:"heat"`
-	Ei       int64  `json:"ei"`
-	Fi       int64  `json:"fi"`
-	Owners   int64  `json:"owners"`
-	Other    int64  `json:"other"`
+	Id       int64    `json:"id" datastore:"-"`
+	Title    string   `json:"title"`
+	Position int32    `json:"position"`
+	Resident Person   `json:"resident"`
+	Owner    Person   `json:"owner"`
+	Common   int64    `json:"common"`
+	Elevetor int64    `json:"elevetor"`
+	Heat     int64    `json:"heat"`
+	Ei       int64    `json:"ei"`
+	Fi       int64    `json:"fi"`
+	Owners   int64    `json:"owners"`
+	Other    int64    `json:"other"`
+	Counters []string `json:"counters"`
 }
 
 type Building struct {
@@ -51,19 +53,7 @@ type Building struct {
 	Closed      int64        `json:"closed"`
 	Active      bool         `json:"active"`
 	Managment   bool         `json:"managment"`
-	Appartments []Appartment `json:"appartments"`
-}
-
-type PublicBuild Building
-
-func (b Building) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		PublicBuild
-		Title string `json:"title"`
-	}{
-		PublicBuild: PublicBuild(b),
-		Title:       b.Address.Street + " " + b.Address.StreetNumber + ", " + b.Address.PostalCode + " " + b.Address.Area,
-	})
+	Appartments []Appartment `json:"appartments" datastore:"-"`
 }
 
 func (b *Building) key(c context.Context) *datastore.Key {

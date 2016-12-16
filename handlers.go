@@ -10,7 +10,8 @@ import (
 	"google.golang.org/appengine/datastore"
 )
 
-func BuildIndex(w http.ResponseWriter, r *http.Request) {
+//BuildAll List of all Buildings
+func BuildAll(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	q := datastore.NewQuery("Building")
 
@@ -31,7 +32,8 @@ func BuildIndex(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func BuildShow(w http.ResponseWriter, r *http.Request) {
+//BuildSingle Building by id
+func BuildSingle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -41,19 +43,20 @@ func BuildShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := appengine.NewContext(r)
-
 	var result Building
 	result.Id = i
+	result.Address.Street = "Test"
 
-	k := result.key(c)
-	err = datastore.Get(c, k, &result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if i != 0 {
+		c := appengine.NewContext(r)
+		k := result.key(c)
+		err = datastore.Get(c, k, &result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		result.Id = k.IntID()
 	}
-
-	result.Id = k.IntID()
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
@@ -63,6 +66,7 @@ func BuildShow(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//BuildInsert insert a Building
 func BuildInsert(w http.ResponseWriter, r *http.Request) {
 	build := Building{}
 	if err := json.NewDecoder(r.Body).Decode(&build); err != nil {
@@ -91,6 +95,7 @@ func BuildInsert(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//BuildUpdate Update a Building
 func BuildUpdate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -128,6 +133,7 @@ func BuildUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//BuildDelete Delete a Building
 func BuildDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
