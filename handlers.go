@@ -13,7 +13,7 @@ import (
 //BuildAll List of all Buildings
 func BuildAll(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	q := datastore.NewQuery("Building")
+	q := datastore.NewQuery("Building").Order("Address.Street").Order("Address.StreetNumber").Order("Address.Area")
 
 	result := []Building{}
 
