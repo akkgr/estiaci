@@ -2,17 +2,23 @@ package estia
 
 import (
 	"encoding/json"
-	"net/http"
+	"net/http"	
 	"strconv"
 
 	"github.com/gorilla/mux"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/user"
 )
 
 //BuildAll List of all Buildings
 func BuildAll(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
+
+	if u := user.Current(c); u != nil {
+		
+	}
+
 	q := datastore.NewQuery("Building").Order("Address.Street").Order("Address.StreetNumber").Order("Address.Area")
 
 	result := []Building{}
