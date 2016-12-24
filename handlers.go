@@ -2,7 +2,7 @@ package estia
 
 import (
 	"encoding/json"
-	"net/http"	
+	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -16,10 +16,24 @@ func BuildAll(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
 	if u := user.Current(c); u != nil {
-		
 	}
 
-	q := datastore.NewQuery("Building").Order("Address.Street").Order("Address.StreetNumber").Order("Address.Area")
+	offset := r.Header.Get("Offset")
+	limit := r.Header.Get("Limit")
+
+	q := datastore.NewQuery("Building")
+	q = q.Order("Address.Street")
+	q = q.Order("Address.StreetNumber")
+	q = q.Order("Address.Area")
+
+	i, err := strconv.ParseInt(offset, 10, 32)
+	if err == nil {
+		q = q.Offset(int(i))
+	}
+	i, err = strconv.ParseInt(limit, 10, 32)
+	if err == nil {
+		q = q.Limit(int(i))
+	}
 
 	result := []Building{}
 

@@ -11,12 +11,12 @@ import (
 type GeoLocation appengine.GeoPoint
 
 type Address struct {
-	Area         string             `json:"area"`
-	Street       string             `json:"street"`
-	StreetNumber string             `json:"streetNumber"`
-	PostalCode   string             `json:"postalCode"`
-	Country      string             `json:"country"`
-	Location     GeoLocation        `json:"location"`
+	Area         string      `json:"area"`
+	Street       string      `json:"street"`
+	StreetNumber string      `json:"streetNumber"`
+	PostalCode   string      `json:"postalCode"`
+	Country      string      `json:"country"`
+	Location     GeoLocation `json:"location"`
 }
 
 type Person struct {
@@ -88,17 +88,17 @@ func (b *Building) save(c context.Context) error {
 }
 
 func (g *GeoLocation) UnmarshalJSON(b []byte) (err error) {
-    var jm map[string]float64
-    if err = json.Unmarshal(b, &jm); err == nil {
-        g.Lat = jm["lat"]
-        g.Lng = jm["lng"]
-    }
-    return
+	var jm map[string]float64
+	if err = json.Unmarshal(b, &jm); err == nil {
+		g.Lat = jm["lat"]
+		g.Lng = jm["lng"]
+	}
+	return
 }
 
 func (g GeoLocation) MarshalJSON() ([]byte, error) {
-    jm := make(map[string]float64)
-    jm["lat"] = g.Lat
-    jm["lng"] = g.Lng
-    return json.Marshal(jm)
+	jm := make(map[string]float64)
+	jm["lat"] = g.Lat
+	jm["lng"] = g.Lng
+	return json.Marshal(jm)
 }
