@@ -2,14 +2,59 @@ package estia
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/user"
 )
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	var user UserCredentials
+
+	//decode request into UserCredentials struct
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//validate user credentials
+	if strings.ToLower(user.Username) != "admin" || user.Password != "123" {
+		http.Error(w, "Invalid credentials", http.StatusInternalServerError)
+		return
+	}
+
+	mySigningKey := []byte("secret")
+
+	// Create the Claims
+	exp := time.Now().Add(time.Minute * 20).Unix()
+	claims := &jwt.StandardClaims{
+		ExpiresAt: exp,
+		Issuer:    "test",
+		Subject:   "admin",
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(mySigningKey)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Error while signing the token")
+		log.Printf("Error signing token: %v\n", err)
+	}
+
+	//create a token instance using the token string
+	response := Token{tokenString}
+	JsonResponse(response, w)
+}
 
 //BuildAll List of all Buildings
 func BuildAll(w http.ResponseWriter, r *http.Request) {
