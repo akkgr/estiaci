@@ -21,7 +21,7 @@ func corsMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFun
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == "OPTIONS" {
 		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Offset,Limit")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
 		w.WriteHeader(http.StatusOK)
 	} else {
 		next(w, r)
@@ -52,11 +52,17 @@ func authMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFun
 func init() {
 	router := mux.NewRouter()
 
-	authRouter := router.PathPrefix("/auth").Subrouter()
+	authBase := mux.NewRouter()
+	router.PathPrefix("/auth").Handler(negroni.New(
+		negroni.HandlerFunc(corsMiddleware),
+		negroni.Wrap(authBase),
+	))
+	authRouter := authBase.PathPrefix("/auth").Subrouter()
 	authRouter.Path("/login").Methods("POST").HandlerFunc(loginHandler)
 
 	apiBase := mux.NewRouter()
 	router.PathPrefix("/api").Handler(negroni.New(
+		negroni.HandlerFunc(corsMiddleware),
 		negroni.HandlerFunc(authMiddleware),
 		negroni.Wrap(apiBase),
 	))
