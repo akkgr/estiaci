@@ -1,15 +1,17 @@
 package estia
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
 
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )
+
+var mySigningKey = []byte("secret")
 
 func corsMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -23,12 +25,11 @@ func corsMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFun
 }
 
 func authMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	token, err := request.ParseFromRequest(r,  request.OAuth2Extractor ,func(token *jwt.Token) (interface{}, error) {
-		return "secret", nil
+	token, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
+		return mySigningKey, nil
 	})
 
 	if err == nil {
-
 		if token.Valid {
 			next(w, r)
 		} else {
@@ -42,30 +43,32 @@ func authMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFun
 }
 
 func init() {
+	router := mux.NewRouter()
 
-	r := mux.NewRouter()
-	n := negroni.New(negroni.HandlerFunc(corsMiddleware), negroni.HandlerFunc(authMiddleware))
+	authRouter := router.PathPrefix("/auth").Subrouter()
+	authRouter.Path("/login").Methods("POST").HandlerFunc(LoginHandler)
 
-	r.HandleFunc("/api/login", LoginHandler).Methods("POST")
-	r.HandleFunc("/api/buildings", BuildAll).Methods("GET")
-	r.HandleFunc("/api/buildings/{id}", BuildSingle).Methods("GET")
-	r.HandleFunc("/api/buildings", BuildInsert).Methods("POST")
-	r.HandleFunc("/api/buildings/{id}", BuildUpdate).Methods("PUT")
-	r.HandleFunc("/api/buildings/{id}", BuildDelete).Methods("DELETE")
+	apiBase := mux.NewRouter()
+	router.PathPrefix("/api").Handler(negroni.New(
+		negroni.HandlerFunc(authMiddleware),
+		negroni.Wrap(apiBase),
+	))
+	apiRouter := apiBase.PathPrefix("/api").Subrouter()
+	apiRouter.Path("/buildings").Methods("GET").HandlerFunc(BuildAll)
+	apiRouter.Path("/buildings/{id}").Methods("GET").HandlerFunc(BuildSingle)
+	apiRouter.Path("/buildings").Methods("POST").HandlerFunc(BuildInsert)
+	apiRouter.Path("/buildings/{id}").Methods("PUT").HandlerFunc(BuildUpdate)
+	apiRouter.Path("/buildings/{id}").Methods("DELETE").HandlerFunc(BuildDelete)
 
-	n.UseHandler(r)
-
-	http.Handle("/", n)
+	http.Handle("/", router)
 }
 
-func JsonResponse(response interface{}, w http.ResponseWriter) {
-
-	json, err :=  json.Marshal(response)
+func jsonResponse(response interface{}, w http.ResponseWriter) {
+	json, err := json.Marshal(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(json)

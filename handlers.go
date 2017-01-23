@@ -32,8 +32,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mySigningKey := []byte("secret")
-
 	// Create the Claims
 	exp := time.Now().Add(time.Minute * 20).Unix()
 	claims := &jwt.StandardClaims{
@@ -53,7 +51,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	//create a token instance using the token string
 	response := Token{tokenString}
-	JsonResponse(response, w)
+	jsonResponse(response, w)
 }
 
 //BuildAll List of all Buildings
