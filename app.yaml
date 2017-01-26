@@ -17,5 +17,8 @@ handlers:
 - url: /building.*
   static_files: wwwroot/index.html
   upload: wwwroot/index.html
+- url: /login.*
+  static_files: wwwroot/index.html
+  upload: wwwroot/index.html
 - url: /
   static_dir: wwwroot
